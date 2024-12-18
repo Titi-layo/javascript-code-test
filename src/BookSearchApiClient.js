@@ -70,7 +70,7 @@ export class BookSearchApiClient {
   }
 
   /**
-   * Requests book my authorname
+   * Requests book my author name
    * @param {*} authorName author name
    * @param {*} limit number of books
    * @returns Array of book objects by a specific author

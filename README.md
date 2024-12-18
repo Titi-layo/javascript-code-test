@@ -1,3 +1,32 @@
+# BookSearchApiClient
+
+API client which makes request to book seller API to retrieve a list of books. Currently able to get books by **Author** and **Publisher**. Book list contains the following information :
+
+```
+title
+author
+isbn
+quantity
+price
+```
+
+# Prerequisites
+
+- NVM (https://github.com/nvm-sh/nvm)
+- Node (https://nodejs.org/en/download/package-manager)
+
+# Local setup
+
+- Ensure all prerequisites are installed
+- Run `nvm use`
+- Run `npm i`
+
+# Testing
+
+Unit tests have been added using jest and can be run by calling
+
+`npm run test`
+
 # Javascript Code Test
 
 `BookSearchApiClient` is a simple class that makes a call to a http API to retrieve a list of books and return them.
