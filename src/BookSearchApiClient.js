@@ -1,6 +1,13 @@
 import { xml2js } from "xml-js";
 
 export class BookSearchApiClient {
+  static queryType = {
+    Publisher: "/by-publisher",
+    Year: "/by-year",
+    Author: "by-author",
+    ISBN: "/by-isbn",
+  };
+
   constructor(config, format) {
     this.basePath = config.basePath || "http://api.book-seller-example.com";
     this.format = format || "json";
@@ -123,6 +130,37 @@ export class BookSearchApiClient {
         console.error(
           `Error fetching books by ${publisherName} - ${err.message}`
         );
+      }
+    } else {
+      console.error("Invalid query search params");
+    }
+
+    return result;
+  }
+
+  /**
+   * Requests book with specified query type
+   * @param {*} queryType Type of query
+   * @param {*} query Search query
+   * @param {*} limit number of books
+   * @returns Array of book objects by a specific publisher
+   */
+
+  async getBooks(queryType, query, limit = this.limit) {
+    var result = [];
+
+    if (query && queryType) {
+      try {
+        const searchParams = new URLSearchParams(
+          Object.entries({ q: query, limit, format: this.format })
+        );
+        const url = queryType[queryType] + "?" + searchParams;
+
+        const response = await this.fetchData(url, {});
+
+        result = this.formatResponse(response);
+      } catch (err) {
+        console.error(`Error fetching books by ${queryType} - ${err.message}`);
       }
     } else {
       console.error("Invalid query search params");
