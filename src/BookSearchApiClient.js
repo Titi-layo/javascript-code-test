@@ -1,7 +1,7 @@
 import { xml2js } from "xml-js";
 
 export class BookSearchApiClient {
-  static queryType = {
+  static query = {
     Publisher: "/by-publisher",
     Year: "/by-year",
     Author: "by-author",
@@ -143,7 +143,7 @@ export class BookSearchApiClient {
    * @param {*} queryType Type of query
    * @param {*} query Search query
    * @param {*} limit number of books
-   * @returns Array of book objects by a specific publisher
+   * @returns Array of book objects by specified query
    */
 
   async getBooks(queryType, query, limit = this.limit) {
@@ -151,10 +151,15 @@ export class BookSearchApiClient {
 
     if (query && queryType) {
       try {
+        if (!BookSearchApiClient.query[queryType]) {
+          throw new Error(`Unsupported query type - ${queryType}`);
+        }
         const searchParams = new URLSearchParams(
           Object.entries({ q: query, limit, format: this.format })
         );
-        const url = queryType[queryType] + "?" + searchParams;
+        const url = BookSearchApiClient.query[queryType] + "?" + searchParams;
+
+        console.log(url);
 
         const response = await this.fetchData(url, {});
 

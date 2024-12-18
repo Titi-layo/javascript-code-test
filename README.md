@@ -1,6 +1,8 @@
 # BookSearchApiClient
 
-API client which makes request to book seller API to retrieve a list of books. Currently able to get books by **Author** and **Publisher**. Book list contains the following information :
+API client which makes request to book seller API to retrieve a list of books. Is able to get books by **Author**, **Publisher**, **ISBN** and **Year**. Client contains specific function for getting books by Author and Publisher as well as generic **GetBook** function which allows you specify what query to be used
+
+Book list contains the following information :
 
 ```
 title
