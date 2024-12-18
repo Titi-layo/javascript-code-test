@@ -1,54 +1,121 @@
-function BookSearchApiClient(format) {
-  this.format = format;
-}
+export class BookSearchApiClient {
+  constructor(config, format) {
+    this.basePath = config.basePath || "http://api.book-seller-example.com";
+    this.format = format || "json";
+  }
 
-BookSearchApiClient.prototype.getBooksByAuthor = function (authorName, limit) {
-  var result = [];
-  var xhr = new XMLHttpRequest();
-  xhr.open(
-    "GET",
-    "http://api.book-seller-example.com/by-author?q=" +
-      authorName +
-      "&limit=" +
-      limit +
-      "&format=" +
-      this.format
-  );
+  /**
+   * Makes fetch call to API
+   * @param endpoint API endpoint to make the request to
+   * @param options  Options to use in the fetch call
+   * @returns Array of book objects
+   */
+  async fetchData(endpoint, options) {
+    const url = new URL(endpoint, this.basePath);
+    const response = await fetch(url, {
+      ...options,
+    });
 
-  xhr.onload = function () {
-    if (xhr.status == 200) {
-      if (this.format == "json") {
-        var json = JSON.parse(xhr.responseText);
-
-        result = json.map(function (item) {
-          return {
-            title: item.book.title,
-            author: item.book.author,
-            isbn: item.book.isbn,
-            quantity: item.stock.quantity,
-            price: item.stock.price,
-          };
-        });
-      } else if (this.format == "xml") {
-        var xml = xhr.responseXML;
-
-        result = xml.documentElement.childNodes.map(function (item) {
-          return {
-            title: item.childNodes[0].childNodes[0].nodeValue,
-            author: item.childNodes[0].childNodes[1].nodeValue,
-            isbn: item.childNodes[0].childNodes[2].nodeValue,
-            quantity: item.childNodes[1].childNodes[0].nodeValue,
-            price: item.childNodes[1].childNodes[1].nodeValue,
-          };
-        });
-      }
-
-      return result;
-    } else {
-      alert("Request failed.  Returned status of " + xhr.status);
+    if (!response.ok) {
+      throw new Error(`Request failed. Returned status of ${response.status}`);
     }
-  };
-  xhr.send();
-};
 
-module.exports = GetBookListApiClient;
+    if (this.format === "json") {
+      return await response.json();
+    }
+
+    return response;
+  }
+
+  /**
+   * Requests book my authorname
+   * @param {*} authorName author name
+   * @param {*} limit number of books
+   * @returns Array of book objects by a specific author
+   */
+
+  async getBooksByAuthor(authorName, limit = 10) {
+    var result = [];
+
+    if (authorName) {
+      try {
+        const searchParams = new URLSearchParams(
+          Object.entries({ authorName, limit, format: this.format })
+        );
+        const url = "/by-author" + "?" + searchParams;
+
+        const response = await this.fetchData(url, {
+          "Content-type": this.format,
+          method: "GET",
+        });
+
+        if (this.format === "json") {
+          result = response.map(function (item) {
+            return {
+              title: item.title,
+              author: item.author,
+              isbn: item.isbn,
+              quantity: item.quantity,
+              price: item.price,
+            };
+          });
+        } else {
+          /**Implement xml parser */
+        }
+      } catch (err) {
+        console.error(`Error fetching books by ${authorName} - ${err.message}`);
+      }
+    } else {
+      console.error("Invalid query search params");
+    }
+
+    return result;
+  }
+
+  /**
+   * Requests book my publisher
+   * @param {*} authorName publisher name
+   * @param {*} limit number of books
+   * @returns Array of book objects by a specific publisher
+   */
+
+  async getBooksByPublisher(publisherName, limit = 10) {
+    var result = [];
+
+    if (publisherName) {
+      try {
+        const searchParams = new URLSearchParams(
+          Object.entries({ publisherName, limit, format: this.format })
+        );
+        const url = "/by-publisher" + "?" + searchParams;
+
+        const response = await this.fetchData(url, {
+          "Content-type": this.format,
+          method: "GET",
+        });
+
+        if (this.format === "json") {
+          result = response.map(function (item) {
+            return {
+              title: item.title,
+              author: item.author,
+              isbn: item.isbn,
+              quantity: item.quantity,
+              price: item.price,
+            };
+          });
+        } else {
+          /**Implement xml parser */
+        }
+      } catch (err) {
+        console.error(
+          `Error fetching books by ${publisherName} - ${err.message}`
+        );
+      }
+    } else {
+      console.error("Invalid query search params");
+    }
+
+    return result;
+  }
+}
