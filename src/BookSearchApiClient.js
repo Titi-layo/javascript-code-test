@@ -91,7 +91,7 @@ export class BookSearchApiClient {
         const searchParams = new URLSearchParams(
           Object.entries({ q: authorName, limit, format: this.format })
         );
-        const url = "/by-author" + "?" + searchParams;
+        const url = BookSearchApiClient.query["Author"] + "?" + searchParams;
 
         const response = await this.fetchData(url, {});
 
@@ -107,7 +107,7 @@ export class BookSearchApiClient {
   }
 
   /**
-   * Requests book my publisher
+   * Requests book by publisher
    * @param {*} publisherName publisher name
    * @param {*} limit number of books
    * @returns Array of book objects by a specific publisher
@@ -121,7 +121,7 @@ export class BookSearchApiClient {
         const searchParams = new URLSearchParams(
           Object.entries({ q: publisherName, limit, format: this.format })
         );
-        const url = "/by-publisher" + "?" + searchParams;
+        const url = BookSearchApiClient.query["Publisher"] + "?" + searchParams;
 
         const response = await this.fetchData(url, {});
 
@@ -152,7 +152,7 @@ export class BookSearchApiClient {
     if (query && queryType) {
       try {
         if (!BookSearchApiClient.query[queryType]) {
-          throw new Error(`Unsupported query type - ${queryType}`);
+          throw new Error(`Unsupported query type`);
         }
         const searchParams = new URLSearchParams(
           Object.entries({ q: query, limit, format: this.format })

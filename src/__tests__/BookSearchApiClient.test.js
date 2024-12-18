@@ -35,7 +35,7 @@ describe("BookSearchApiClient", () => {
       });
     });
 
-    it("should handle incorrect query prams", async () => {
+    it("should handle incorrect query params", async () => {
       const client = new BookSearchApiClient({}, "json");
       const books = await client.getBooksByAuthor();
       expect(books).toEqual([]);
@@ -91,7 +91,7 @@ describe("BookSearchApiClient", () => {
       });
     });
 
-    it("should handle incorrect query prams", async () => {
+    it("should handle incorrect query params", async () => {
       const client = new BookSearchApiClient({}, "json");
       const books = await client.getBooksByPublisher();
       expect(books).toEqual([]);
@@ -147,7 +147,7 @@ describe("BookSearchApiClient", () => {
       });
     });
 
-    it("should handle incorrect query prams", async () => {
+    it("should handle incorrect query params", async () => {
       const client = new BookSearchApiClient({}, "json");
       const books = await client.getBooks();
       expect(books).toEqual([]);
@@ -182,9 +182,17 @@ describe("BookSearchApiClient", () => {
 
     it("should log error for unsupported format", async () => {
       const client = new BookSearchApiClient({}, "some-random-format");
-      await client.getBooksByPublisher("ISBN", 3463664656, 10);
+      await client.getBooks("ISBN", 3463664656, 10);
       expect(logSpy).toHaveBeenCalledWith(
         `Error fetching books by ISBN - some-random-format is not Supported`
+      );
+    });
+
+    it("should log error for unsupported query type", async () => {
+      const client = new BookSearchApiClient({}, "json");
+      await client.getBooks("some-random-query-type", 3463664656, 10);
+      expect(logSpy).toHaveBeenCalledWith(
+        `Error fetching books by some-random-query-type - Unsupported query type`
       );
     });
   });
