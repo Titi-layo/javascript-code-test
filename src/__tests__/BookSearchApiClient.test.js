@@ -67,6 +67,14 @@ describe("BookSearchApiClient", () => {
         `Error fetching books by some-author - Request failed. Returned status of 500`
       );
     });
+
+    it("should log error for unsupported format", async () => {
+      const client = new BookSearchApiClient({}, "some-random-format");
+      await client.getBooksByAuthor("some-author", 10);
+      expect(logSpy).toHaveBeenCalledWith(
+        `Error fetching books by some-author - some-random-format is not Supported`
+      );
+    });
   });
 
   describe("getBooksByPublisher", () => {
@@ -113,6 +121,14 @@ describe("BookSearchApiClient", () => {
       await client.getBooksByPublisher("some-publisher", 10);
       expect(logSpy).toHaveBeenCalledWith(
         `Error fetching books by some-publisher - Request failed. Returned status of 500`
+      );
+    });
+
+    it("should log error for unsupported format", async () => {
+      const client = new BookSearchApiClient({}, "some-random-format");
+      await client.getBooksByPublisher("some-publisher", 10);
+      expect(logSpy).toHaveBeenCalledWith(
+        `Error fetching books by some-publisher - some-random-format is not Supported`
       );
     });
   });

@@ -63,7 +63,7 @@ export class BookSearchApiClient {
         };
       });
     } else {
-      throw new Error("Unsupported format. Supported formats are xml and json");
+      throw new Error(`${this.format} is not Supported`);
     }
 
     return result;
