@@ -4,6 +4,7 @@ export class BookSearchApiClient {
   constructor(config, format) {
     this.basePath = config.basePath || "http://api.book-seller-example.com";
     this.format = format || "json";
+    this.limit = 10;
   }
 
   /**
@@ -30,13 +31,48 @@ export class BookSearchApiClient {
   }
 
   /**
+   * Format API response into Book format
+   * @param response API reponse
+   */
+  formatResponse(response) {
+    let result;
+    if (this.format === "xml") {
+      const jsResp = xml2js(response, {
+        ignoreAttributes: true,
+        ignoreComment: true,
+        compact: true,
+      });
+
+      result = jsResp.books.item.map((item) => ({
+        title: item.title["_text"],
+        author: item.author["_text"],
+        isbn: item.isbn["_text"],
+        quantity: item.quantity["_text"],
+        price: item.price["_text"],
+      }));
+    } else {
+      result = response.map(function (item) {
+        return {
+          title: item.title,
+          author: item.author,
+          isbn: item.isbn,
+          quantity: item.quantity,
+          price: item.price,
+        };
+      });
+    }
+
+    return result;
+  }
+
+  /**
    * Requests book my authorname
    * @param {*} authorName author name
    * @param {*} limit number of books
    * @returns Array of book objects by a specific author
    */
 
-  async getBooksByAuthor(authorName, limit = 10) {
+  async getBooksByAuthor(authorName, limit = this.limit) {
     var result = [];
 
     if (authorName) {
@@ -51,31 +87,7 @@ export class BookSearchApiClient {
           method: "GET",
         });
 
-        if (this.format === "xml") {
-          const jsResp = xml2js(response, {
-            ignoreAttributes: true,
-            ignoreComment: true,
-            compact: true,
-          });
-
-          result = jsResp.books.item.map((item) => ({
-            title: item.title["_text"],
-            author: item.author["_text"],
-            isbn: item.isbn["_text"],
-            quantity: item.quantity["_text"],
-            price: item.price["_text"],
-          }));
-        } else {
-          result = response.map(function (item) {
-            return {
-              title: item.title,
-              author: item.author,
-              isbn: item.isbn,
-              quantity: item.quantity,
-              price: item.price,
-            };
-          });
-        }
+        result = this.formatResponse(response);
       } catch (err) {
         console.error(`Error fetching books by ${authorName} - ${err.message}`);
       }
@@ -93,7 +105,7 @@ export class BookSearchApiClient {
    * @returns Array of book objects by a specific publisher
    */
 
-  async getBooksByPublisher(publisherName, limit = 10) {
+  async getBooksByPublisher(publisherName, limit = this.limit) {
     var result = [];
 
     if (publisherName) {
@@ -108,32 +120,7 @@ export class BookSearchApiClient {
           method: "GET",
         });
 
-        if (this.format === "xml") {
-          const jsResp = xml2js(response, {
-            ignoreAttributes: true,
-            ignoreComment: true,
-            compact: true,
-          });
-
-          result = jsResp.books.item.map((item) => ({
-            title: item.title["_text"],
-            author: item.author["_text"],
-            isbn: item.isbn["_text"],
-            quantity: item.quantity["_text"],
-            price: item.price["_text"],
-          }));
-        } else {
-          /**JSON is the default format */
-          result = response.map(function (item) {
-            return {
-              title: item.title,
-              author: item.author,
-              isbn: item.isbn,
-              quantity: item.quantity,
-              price: item.price,
-            };
-          });
-        }
+        result = this.formatResponse(response);
       } catch (err) {
         console.error(
           `Error fetching books by ${publisherName} - ${err.message}`
