@@ -1,3 +1,5 @@
+import { xml2js } from "xml-js";
+
 export class BookSearchApiClient {
   constructor(config, format) {
     this.basePath = config.basePath || "http://api.book-seller-example.com";
@@ -24,7 +26,7 @@ export class BookSearchApiClient {
       return await response.json();
     }
 
-    return response;
+    return await response.text();
   }
 
   /**
@@ -40,7 +42,7 @@ export class BookSearchApiClient {
     if (authorName) {
       try {
         const searchParams = new URLSearchParams(
-          Object.entries({ authorName, limit, format: this.format })
+          Object.entries({ q: authorName, limit, format: this.format })
         );
         const url = "/by-author" + "?" + searchParams;
 
@@ -49,7 +51,21 @@ export class BookSearchApiClient {
           method: "GET",
         });
 
-        if (this.format === "json") {
+        if (this.format === "xml") {
+          const jsResp = xml2js(response, {
+            ignoreAttributes: true,
+            ignoreComment: true,
+            compact: true,
+          });
+
+          result = jsResp.books.item.map((item) => ({
+            title: item.title["_text"],
+            author: item.author["_text"],
+            isbn: item.isbn["_text"],
+            quantity: item.quantity["_text"],
+            price: item.price["_text"],
+          }));
+        } else {
           result = response.map(function (item) {
             return {
               title: item.title,
@@ -59,8 +75,6 @@ export class BookSearchApiClient {
               price: item.price,
             };
           });
-        } else {
-          /**Implement xml parser */
         }
       } catch (err) {
         console.error(`Error fetching books by ${authorName} - ${err.message}`);
@@ -94,7 +108,22 @@ export class BookSearchApiClient {
           method: "GET",
         });
 
-        if (this.format === "json") {
+        if (this.format === "xml") {
+          const jsResp = xml2js(response, {
+            ignoreAttributes: true,
+            ignoreComment: true,
+            compact: true,
+          });
+
+          result = jsResp.books.item.map((item) => ({
+            title: item.title["_text"],
+            author: item.author["_text"],
+            isbn: item.isbn["_text"],
+            quantity: item.quantity["_text"],
+            price: item.price["_text"],
+          }));
+        } else {
+          /**JSON is the default format */
           result = response.map(function (item) {
             return {
               title: item.title,
@@ -104,8 +133,6 @@ export class BookSearchApiClient {
               price: item.price,
             };
           });
-        } else {
-          /**Implement xml parser */
         }
       } catch (err) {
         console.error(

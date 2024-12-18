@@ -1,5 +1,5 @@
 import { BookSearchApiClient } from "../BookSearchApiClient";
-import { books } from "./testData";
+import { booksJson, booksXml, booksXmlToJs } from "./testData";
 
 global.fetch = jest.fn();
 const logSpy = jest.spyOn(console, "error");
@@ -16,7 +16,8 @@ describe("BookSearchApiClient", () => {
       status: "200",
       statusText: "ok",
       ok: true,
-      json: async () => books,
+      json: async () => booksJson,
+      text: async () => booksXml,
     });
   });
 
@@ -25,7 +26,7 @@ describe("BookSearchApiClient", () => {
       const client = new BookSearchApiClient("json");
       await client.getBooksByAuthor("some-author", 10);
       const url = new URL(
-        "/by-author?authorName=some-author&limit=10&format=json",
+        "/by-author?q=some-author&limit=10&format=json",
         "http://api.book-seller-example.com"
       );
       expect(mockedFetch).toHaveBeenCalledWith(url, {
@@ -41,10 +42,16 @@ describe("BookSearchApiClient", () => {
       expect(logSpy).toHaveBeenCalledWith("Invalid query search params");
     });
 
-    it("should fetch data in the correct format", async () => {
+    it("should fetch data in json format", async () => {
       const client = new BookSearchApiClient({}, "json");
-      const bookshhh = await client.getBooksByAuthor("some-author", 10);
-      expect(bookshhh).toEqual(books);
+      const books = await client.getBooksByAuthor("some-author", 10);
+      expect(books).toEqual(booksJson);
+    });
+
+    it("should fetch data in xml format", async () => {
+      const client = new BookSearchApiClient({}, "xml");
+      const books = await client.getBooksByAuthor("some-author", 10);
+      expect(books).toEqual(booksXmlToJs);
     });
 
     it("should log error if fetch fails", async () => {
@@ -63,26 +70,11 @@ describe("BookSearchApiClient", () => {
   });
 
   describe("getBooksByPublisher", () => {
-    const mockedFetch = global.fetch;
-
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
-
-    beforeEach(() => {
-      mockedFetch.mockResolvedValue({
-        status: "200",
-        statusText: "ok",
-        ok: true,
-        json: async () => books,
-      });
-    });
-
     it("should call fetch with the correct paramters", async () => {
       const client = new BookSearchApiClient("json");
       await client.getBooksByAuthor("some-publisher", 10);
       const url = new URL(
-        "/by-publisher?publisherName=some-publisher&limit=10&format=json",
+        "/by-publisher?q=some-publisher&limit=10&format=json",
         "http://api.book-seller-example.com"
       );
       expect(mockedFetch).toHaveBeenCalledWith(url, {
@@ -98,10 +90,16 @@ describe("BookSearchApiClient", () => {
       expect(logSpy).toHaveBeenCalledWith("Invalid query search params");
     });
 
-    it("should fetch data in the correct format", async () => {
+    it("should fetch data in json format", async () => {
       const client = new BookSearchApiClient({}, "json");
-      const bookshhh = await client.getBooksByPublisher("some-publisher", 10);
-      expect(bookshhh).toEqual(books);
+      const books = await client.getBooksByPublisher("some-publisher", 10);
+      expect(books).toEqual(booksJson);
+    });
+
+    it("should fetch data in xml format", async () => {
+      const client = new BookSearchApiClient({}, "xml");
+      const books = await client.getBooksByPublisher("some-publisher", 10);
+      expect(books).toEqual(booksXmlToJs);
     });
 
     it("should log error if fetch fails", async () => {
