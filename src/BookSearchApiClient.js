@@ -11,11 +11,13 @@ export class BookSearchApiClient {
    * Makes fetch call to API
    * @param endpoint API endpoint to make the request to
    * @param options  Options to use in the fetch call
-   * @returns Array of book objects
+   * @returns API response - can either be json or text
    */
   async fetchData(endpoint, options) {
     const url = new URL(endpoint, this.basePath);
     const response = await fetch(url, {
+      method: "GET",
+      "Content-type": this.format,
       ...options,
     });
 
@@ -32,7 +34,7 @@ export class BookSearchApiClient {
 
   /**
    * Format API response into Book format
-   * @param response API reponse
+   * @param response API reponse (json / xml supported)
    */
   formatResponse(response) {
     let result;
@@ -50,7 +52,7 @@ export class BookSearchApiClient {
         quantity: item.quantity["_text"],
         price: item.price["_text"],
       }));
-    } else {
+    } else if (this.format === "json") {
       result = response.map(function (item) {
         return {
           title: item.title,
@@ -60,6 +62,8 @@ export class BookSearchApiClient {
           price: item.price,
         };
       });
+    } else {
+      throw new Error("Unsupported format. Supported formats are xml and json");
     }
 
     return result;
@@ -82,10 +86,7 @@ export class BookSearchApiClient {
         );
         const url = "/by-author" + "?" + searchParams;
 
-        const response = await this.fetchData(url, {
-          "Content-type": this.format,
-          method: "GET",
-        });
+        const response = await this.fetchData(url, {});
 
         result = this.formatResponse(response);
       } catch (err) {
@@ -100,7 +101,7 @@ export class BookSearchApiClient {
 
   /**
    * Requests book my publisher
-   * @param {*} authorName publisher name
+   * @param {*} publisherName publisher name
    * @param {*} limit number of books
    * @returns Array of book objects by a specific publisher
    */
@@ -111,14 +112,11 @@ export class BookSearchApiClient {
     if (publisherName) {
       try {
         const searchParams = new URLSearchParams(
-          Object.entries({ publisherName, limit, format: this.format })
+          Object.entries({ q: publisherName, limit, format: this.format })
         );
         const url = "/by-publisher" + "?" + searchParams;
 
-        const response = await this.fetchData(url, {
-          "Content-type": this.format,
-          method: "GET",
-        });
+        const response = await this.fetchData(url, {});
 
         result = this.formatResponse(response);
       } catch (err) {
